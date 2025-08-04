@@ -5,6 +5,8 @@ import xml.etree.ElementTree as ET
 from datetime import datetime
 import subprocess
 
+# Teszt komment - VS Code szerkesztés
+
 # --- 1. Betöltjük a .env fájlt ---
 load_dotenv()
 API_ID = int(os.getenv("API_ID"))
