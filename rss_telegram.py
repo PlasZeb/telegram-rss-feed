@@ -39,9 +39,9 @@ def create_rss(messages):
 
 # --- 4. GitHub Pages feltöltés ---
 def upload_to_github():
-    subprocess.run(["git", "add", "rss_feed.xml"])
-    subprocess.run(["git", "commit", "-m", "Update RSS feed"])
-    subprocess.run(["git", "push"])
+    # When running in GitHub Actions, this will be handled by the workflow
+    # So we'll just print a message
+    print("RSS feed generated successfully. GitHub Actions will handle the upload.")
 
 # --- 5. Fő folyamat ---
 async def main():
