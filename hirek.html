@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geopolitika Hírek | Telegram RSS Feed</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        .header-info {
+            text-align: center;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+        .news-item {
+            border: 1px solid #e1e8ed;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: #fafafa;
+            transition: box-shadow 0.3s ease;
+        }
+        .news-item:hover {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .news-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+        .news-content {
+            color: #34495e;
+            margin-bottom: 15px;
+            white-space: pre-wrap;
+            font-size: 14px;
+        }
+        .news-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 10px;
+            border-top: 1px solid #e1e8ed;
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+        .news-date {
+            background: #3498db;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        .news-link {
+            background: #e74c3c;
+            color: white;
+            text-decoration: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            transition: background 0.3s ease;
+        }
+        .news-link:hover {
+            background: #c0392b;
+        }
+        .loading {
+            text-align: center;
+            color: #7f8c8d;
+            font-style: italic;
+            padding: 50px 0;
+        }
+        .error {
+            background: #e74c3c;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .stats {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📰 Geopolitika Hírek</h1>
+        <div class="header-info">
+            Telegram csatorna: @geopolitics_prime<br>
+            Automatikusan frissül naponta 6:00-kor
+        </div>
+        
+        <div id="stats" class="stats" style="display: none;">
+            <strong id="newsCount">0</strong> hír betöltve | 
+            Utolsó frissítés: <span id="lastUpdate">-</span>
+        </div>
+        
+        <div id="loading" class="loading">
+            📡 Hírek betöltése...
+        </div>
+        
+        <div id="error" class="error" style="display: none;">
+            ❌ Hiba történt a hírek betöltése során. Próbáld újra később.
+        </div>
+        
+        <div id="newsContainer">
+            <!-- Hírek itt jelennek meg -->
+        </div>
+    </div>
+
+    <script>
+        async function loadNews() {
+            try {
+                // JSON feed betöltése
+                const response = await fetch('rss_feed.json');
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                
+                const data = await response.json();
+                
+                // Loading elrejtése
+                document.getElementById('loading').style.display = 'none';
+                
+                // Statisztikák megjelenítése
+                const statsDiv = document.getElementById('stats');
+                const newsCount = document.getElementById('newsCount');
+                const lastUpdate = document.getElementById('lastUpdate');
+                
+                newsCount.textContent = data.items.length;
+                lastUpdate.textContent = new Date().toLocaleString('hu-HU');
+                statsDiv.style.display = 'block';
+                
+                // Hírek megjelenítése
+                const container = document.getElementById('newsContainer');
+                
+                data.items.forEach(item => {
+                    const newsDiv = document.createElement('div');
+                    newsDiv.className = 'news-item';
+                    
+                    // Dátum formázása
+                    const date = new Date(item.date_published);
+                    const formattedDate = date.toLocaleString('hu-HU', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    
+                    // Tartalom rövidítése ha túl hosszú
+                    let content = item.content_text;
+                    if (content.length > 500) {
+                        content = content.substring(0, 500) + '...';
+                    }
+                    
+                    newsDiv.innerHTML = `
+                        <div class="news-title">${item.title}</div>
+                        <div class="news-content">${content}</div>
+                        <div class="news-meta">
+                            <span class="news-date">${formattedDate}</span>
+                            <a href="${item.url}" target="_blank" class="news-link">📖 Teljes cikk</a>
+                        </div>
+                    `;
+                    
+                    container.appendChild(newsDiv);
+                });
+                
+            } catch (error) {
+                console.error('Error loading news:', error);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').style.display = 'block';
+            }
+        }
+        
+        // Oldal betöltésekor hírek betöltése
+        document.addEventListener('DOMContentLoaded', loadNews);
+        
+        // 5 percenként automatikus frissítés
+        setInterval(loadNews, 5 * 60 * 1000);
+    </script>
+</body>
+</html>
