@@ -1,0 +1,4 @@
+git init
+git branch -M main
+git remote add origin git@github.com:plaszeb/telegram-rss-feed.git
+git pull origin main --allow-unrelated-histories
