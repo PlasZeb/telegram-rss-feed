@@ -11,10 +11,15 @@ import subprocess
 load_dotenv()
 API_ID = int(os.getenv("API_ID"))
 API_HASH = os.getenv("API_HASH")
+BOT_TOKEN = os.getenv("BOT_TOKEN")
 CHANNEL_USERNAME = os.getenv("CHANNEL_USERNAME")
 
 # --- 2. Telethon kliens ---
-client = TelegramClient('rss_session', API_ID, API_HASH)
+# Check if we have a bot token (for GitHub Actions) or use user auth (for local)
+if BOT_TOKEN:
+    client = TelegramClient('bot_session', API_ID, API_HASH).start(bot_token=BOT_TOKEN)
+else:
+    client = TelegramClient('rss_session', API_ID, API_HASH)
 
 # --- 3. JSON feed létrehozása ---
 def create_rss(messages):
@@ -56,7 +61,10 @@ def upload_to_github():
 
 # --- 5. Fő folyamat ---
 async def main():
-    await client.start()
+    # Only start if we don't have bot token (user auth)
+    if not BOT_TOKEN:
+        await client.start()
+    
     messages = await client.get_messages(CHANNEL_USERNAME, limit=50)
     create_rss(messages)
     upload_to_github()
