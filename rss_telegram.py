@@ -5,7 +5,7 @@ import xml.etree.ElementTree as ET
 from datetime import datetime
 import subprocess
 
-# Teszt komment - VS Code szerkesztés
+# Teszt komment - Source Control gombokkal!
 
 # --- 1. Betöltjük a .env fájlt ---
 load_dotenv()
